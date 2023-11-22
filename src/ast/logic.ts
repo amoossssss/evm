@@ -4,6 +4,9 @@ abstract class Cmp extends Tag {
     constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
         super();
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 abstract class Unary extends Tag {
@@ -15,6 +18,9 @@ abstract class Unary extends Tag {
 abstract class Shift extends Tag {
     constructor(readonly value: Expr, readonly shift: Expr) {
         super();
+    }
+    override children(): Expr[] {
+        return [];
     }
 }
 
@@ -61,6 +67,9 @@ export class IsZero extends Tag {
             : val.tag === 'IsZero'
             ? val.value
             : new IsZero(val);
+    }
+    override children(): Expr[] {
+        return [];
     }
 }
 
@@ -117,6 +126,9 @@ export class Not extends Unary {
         const val = this.value.eval();
         return val.isVal() ? new Val(mod(~val.val)) : new Not(val);
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 export class Byte extends Tag {
@@ -130,6 +142,9 @@ export class Byte extends Tag {
         return data.isVal() && pos.isVal()
             ? new Val((data.val >> pos.val) & 1n)
             : new Byte(pos, data);
+    }
+    override children(): Expr[] {
+        return [];
     }
 }
 
@@ -167,5 +182,8 @@ export class Sig extends Tag {
     }
     eval(): Expr {
         return this;
+    }
+    override children(): Expr[] {
+        return [];
     }
 }

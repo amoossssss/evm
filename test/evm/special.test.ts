@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, STEP, State, sol } from 'sevm';
+import { EVM, STEP, State, reduce, sol } from 'sevm';
 import type { Expr, Inst, Log } from 'sevm/ast';
 import { Add, Block, CallDataLoad, CallValue, Info, Msg, Tx, Val } from 'sevm/ast';
 
@@ -58,11 +58,9 @@ describe('evm::special', function () {
 
     for (const [mnemonic, sym] of Object.entries(Info)) {
         describe(`\`${sym.value}\` prop pushed from \`${mnemonic}\``, function () {
-            it('should be well-formed', function () {
+            it('should be well-formed and get `expr` from stack', function () {
                 expect(sol`${sym}`).to.be.equal(sym.value);
-            });
 
-            it('should get expr from stack', function () {
                 const state = new State<never, Expr>();
                 STEP()[mnemonic](state);
 
@@ -91,7 +89,8 @@ describe('evm::special', function () {
                     state = state.last.destBranch.state;
                 }
 
-                const stmt = state.stmts[0];
+                const stmts = reduce(state.stmts);
+                const stmt = stmts[0];
                 expect(stmt.name).to.be.equal('Log');
                 expect((<Log>stmt).args![0].eval()).to.be.deep.equal(sym);
             });

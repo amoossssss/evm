@@ -1,9 +1,10 @@
 import { expect } from 'chai';
 
 import { State, STEP } from 'sevm';
-import { Val, type Expr } from 'sevm/ast';
+import { Val, type Expr, Local, Locali } from 'sevm/ast';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
+const sizes = [...Array(16).keys()].map(i => i + 1);
 
 describe('evm::stack', function () {
     describe('PUSHES', function () {
@@ -23,78 +24,69 @@ describe('evm::stack', function () {
     });
 
     describe('DUPS', function () {
-        [...Array(16).keys()]
-            .map(i => i + 1)
-            .forEach(size => {
-                it(`should dup #${size - 1} element on the stack`, function () {
-                    const state = new State<never, Expr>();
-                    state.stack.push(new Val(2n));
+        sizes.forEach(size => {
+            it(`should dup #${size - 1} element on the stack`, function () {
+                const state = new State<never, Expr>();
+                state.stack.push(new Val(2n));
 
-                    const ignored = [];
-                    for (let i = 1; i < size; i++) {
-                        ignored.push(new Val(1n));
-                        state.stack.push(new Val(1n));
-                    }
+                const ignored = [];
+                for (let i = 1; i < size; i++) {
+                    ignored.push(new Val(1n));
+                    state.stack.push(new Val(1n));
+                }
 
-                    STEP()[`DUP${size as Size}`](state);
+                STEP()[`DUP${size as Size}`](state);
 
-                    expect(state.stack.values).to.deep.equal([
-                        new Val(2n),
-                        ...ignored,
-                        new Val(2n),
-                    ]);
-                });
-
-                it(`should throw when #${size} element is not present on the stack`, function () {
-                    const state = new State<never, Expr>();
-
-                    for (let i = 1; i < size; i++) {
-                        state.stack.push(new Val(1n));
-                    }
-
-                    expect(() => STEP()[`DUP${size as Size}`](state)).to.throw(
-                        'Invalid duplication operation'
-                    );
-                });
+                const local = new Local(0, new Val(2n));
+                expect(state.nlocals).to.be.equal(1);
+                expect(state.stmts).to.be.deep.equal([new Locali(local)]);
+                expect(state.stack.values).to.deep.equal([local, ...ignored, local]);
             });
+
+            it(`should throw when #${size} element is not present on the stack`, function () {
+                const state = new State<never, Expr>();
+
+                for (let i = 1; i < size; i++) {
+                    state.stack.push(new Val(1n));
+                }
+
+                expect(() => STEP()[`DUP${size as Size}`](state)).to.throw(
+                    'Invalid duplication operation'
+                );
+            });
+        });
     });
 
     describe('SWAPS', function () {
-        [...Array(16).keys()]
-            .map(i => i + 1)
-            .forEach(size => {
-                it(`should swap #${size} element on the stack`, function () {
-                    const state = new State<never, Expr>();
-                    state.stack.push(new Val(2n));
+        sizes.forEach(size => {
+            it(`should swap #${size} element on the stack`, function () {
+                const state = new State<never, Expr>();
+                state.stack.push(new Val(2n));
 
-                    const ignored = [];
-                    for (let i = 1; i < size; i++) {
-                        ignored.push(new Val(1n));
-                        state.stack.push(new Val(1n));
-                    }
+                const ignored = [];
+                for (let i = 1; i < size; i++) {
+                    ignored.push(new Val(1n));
+                    state.stack.push(new Val(1n));
+                }
 
-                    state.stack.push(new Val(3n));
+                state.stack.push(new Val(3n));
 
-                    STEP()[`SWAP${size as Size}`](state);
+                STEP()[`SWAP${size as Size}`](state);
 
-                    expect(state.stack.values).to.deep.equal([
-                        new Val(2n),
-                        ...ignored,
-                        new Val(3n),
-                    ]);
-                });
-
-                it(`should throw when #${size + 1} elem is not present on the stack`, function () {
-                    const state = new State<never, Expr>();
-
-                    for (let i = 1; i <= size; i++) {
-                        state.stack.push(new Val(1n));
-                    }
-
-                    expect(() => STEP()[`SWAP${size as Size}`](state)).to.throw(
-                        'Invalid swap operation'
-                    );
-                });
+                expect(state.stack.values).to.deep.equal([new Val(2n), ...ignored, new Val(3n)]);
             });
+
+            it(`should throw when #${size + 1} elem is not present on the stack`, function () {
+                const state = new State<never, Expr>();
+
+                for (let i = 1; i <= size; i++) {
+                    state.stack.push(new Val(1n));
+                }
+
+                expect(() => STEP()[`SWAP${size as Size}`](state)).to.throw(
+                    'Position not found for swap operation'
+                );
+            });
+        });
     });
 });

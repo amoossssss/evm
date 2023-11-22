@@ -56,6 +56,8 @@ function solExpr(expr: Expr): string {
     switch (expr.tag) {
         case 'Val':
             return `${expr.isJumpDest() ? '[J]' : ''}0x${expr.val.toString(16)}`;
+        case 'Local':
+            return expr.nrefs > 0 ? `local${expr.index}` : sol`${expr.value}`;
         case 'Add':
         case 'Mul':
         case 'Sub':
@@ -177,6 +179,8 @@ function solExpr(expr: Expr): string {
 
 function solInst(inst: Inst): string {
     switch (inst.name) {
+        case 'Local':
+            return sol`${inst.local.value.type} local${inst.local.index} = ${inst.local.value}; // #refs ${inst.local.nrefs}`;
         case 'MStore':
             return sol`memory[${inst.location}] = ${inst.data};`;
         case 'Stop':
@@ -194,7 +198,7 @@ function solInst(inst: Inst): string {
         case 'Revert':
             return inst.args === undefined
                 ? sol`revert(memory[${inst.offset}:(${inst.offset}+${inst.size})]);`
-                : `revert(${inst.args.join(', ')});`;
+                : `revert(${inst.args.map(solExpr).join(', ')});`;
         case 'SelfDestruct':
             return sol`selfdestruct(${inst.address});`;
         case 'Invalid':
@@ -206,10 +210,8 @@ function solInst(inst: Inst): string {
                       .join(', ')});`
                 : 'log(' +
                       (inst.args === undefined
-                          ? [
-                                ...inst.topics,
-                                sol`memory[${inst.mem.offset}:${inst.mem.size} ]`,
-                            ].join(', ') + 'ii'
+                          ? [...inst.topics, sol`memory[${inst.offset}:${inst.size} ]`].join(', ') +
+                            'ii'
                           : [...inst.topics, ...inst.args].map(solExpr).join(', ')) +
                       ');';
         case 'Jump':
@@ -346,6 +348,12 @@ export function solStmts(stmts: Stmt[], indentation = 0): string {
             }
             text += ' '.repeat(indentation) + '}\n';
         } else {
+            if (stmt.name === 'Local' && stmt.local.nrefs <= 0) {
+                continue;
+            }
+            if (stmt.name === 'MStore') {
+                continue;
+            }
             text += ' '.repeat(indentation) + solStmt(stmt) + '\n';
         }
     }

@@ -9,6 +9,9 @@ export class Sha3 extends Tag {
     eval(): Expr {
         return new Sha3(this.offset, this.size, this.args?.map(evalE));
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 export class Create extends Tag {
@@ -28,6 +31,9 @@ export class Create extends Tag {
 
     eval(): Expr {
         return this;
+    }
+    override children(): Expr[] {
+        return [];
     }
 }
 
@@ -50,6 +56,9 @@ export class Call extends Tag {
     eval(): Expr {
         return this;
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 export class ReturnData extends Tag {
@@ -63,6 +72,9 @@ export class ReturnData extends Tag {
 
     eval(): Expr {
         return this;
+    }
+    override children(): Expr[] {
+        return [];
     }
 }
 
@@ -83,6 +95,9 @@ export class CallCode extends Tag {
     eval(): Expr {
         return this;
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 export class Create2 extends Tag {
@@ -93,6 +108,9 @@ export class Create2 extends Tag {
 
     eval(): Expr {
         return this;
+    }
+    override children(): Expr[] {
+        return [];
     }
 }
 
@@ -112,6 +130,9 @@ export class StaticCall extends Tag {
     eval(): Expr {
         return this;
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 export class DelegateCall extends Tag {
@@ -129,6 +150,9 @@ export class DelegateCall extends Tag {
 
     eval(): Expr {
         return this;
+    }
+    override children(): Expr[] {
+        return [];
     }
 }
 
@@ -175,7 +199,7 @@ export class Revert implements IInst {
     constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) {}
 
     eval() {
-        return this;
+        return new Revert(this.offset.eval(), this.size.eval(), this.args?.map(evalE));
     }
 }
 

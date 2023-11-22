@@ -19,6 +19,7 @@ export * from './evm';
 export * from './stmt';
 export * from './sol';
 export * from './yul';
+export * from './huff';
 
 /**
  *
@@ -360,7 +361,9 @@ export class PublicFunction {
 
 export function build(state: State<Inst, Expr>): Stmt[] {
     const visited = new WeakSet();
-    return buildState(state);
+    const res = buildState(state);
+    // mem(res);
+    return res;
 
     function buildState(state: State<Inst, Expr>): Stmt[] {
         if (visited.has(state)) {
@@ -373,7 +376,7 @@ export function build(state: State<Inst, Expr>): Stmt[] {
         if (last === undefined) return [];
 
         for (let i = 0; i < state.stmts.length; i++) {
-            state.stmts[i] = state.stmts[i].eval();
+            // state.stmts[i] = state.stmts[i].eval();
         }
 
         switch (last.name) {
@@ -416,6 +419,17 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                 return state.stmts;
         }
     }
+}
+
+export function reduce(stmts: Inst[]): Stmt[] {
+    const result = [];
+    for (const stmt of stmts) {
+        if (stmt.name !== 'Local' || stmt.local.nrefs > 0) {
+            result.push(stmt);
+        }
+    }
+
+    return result;
 }
 
 function requiresNoValue(stmts: Stmt[]): boolean {

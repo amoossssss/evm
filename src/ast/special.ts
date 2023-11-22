@@ -57,6 +57,9 @@ export class Prop extends Tag {
     eval(): Expr {
         return this;
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 export const Info = mapValues(PROPS, info => new Prop(info));
@@ -90,6 +93,9 @@ export class Fn extends Tag {
     eval(): Expr {
         return new Fn(this.mnemonic, this.value.eval());
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 export class DataCopy extends Tag {
@@ -106,6 +112,9 @@ export class DataCopy extends Tag {
     eval(): this {
         return this;
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 /**
@@ -115,6 +124,9 @@ export class CallValue extends Tag {
     readonly tag = 'CallValue';
     eval(): Expr {
         return this;
+    }
+    override children(): Expr[] {
+        return [];
     }
 }
 
@@ -126,5 +138,8 @@ export class CallDataLoad extends Tag {
     eval(): Expr {
         this.location = this.location.eval();
         return this;
+    }
+    override children(): Expr[] {
+        return [];
     }
 }

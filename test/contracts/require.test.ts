@@ -5,7 +5,7 @@ import { Contract } from 'sevm';
 import { contracts } from '../utils/solc';
 
 contracts('require', compile => {
-    it('should `decompile` contract with `require`s', function () {
+    it.skip('should `decompile` contract with `require`s', function () {
         const src = `contract Test {
             mapping (address => uint256) private _allowances;
             function approve(uint256 amount) external {

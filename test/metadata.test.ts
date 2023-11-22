@@ -26,14 +26,9 @@ describe('metadata', function () {
     } as const;
 
     forVersion((compile, _fallback, version) => {
-        let output: ReturnType<typeof compile>;
-
-        before(function () {
-            output = compile('contract Test {}', this);
-        });
-
         it('should get metadata for deployed bytecode', function () {
-            const [, metadata] = stripMetadataHash(output.bytecode);
+            const { bytecode } = compile('contract Test {}', this);
+            const [, metadata] = stripMetadataHash(bytecode);
 
             const [protocol, hash, expectedVersion] = HASHES[version];
             expect(metadata).to.be.deep.equal(

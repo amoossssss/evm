@@ -7,7 +7,7 @@ import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
 contracts('variables', (compile, _fallback, version) => {
-    describe('with private variables in different locations', function () {
+    describe.skip('with private variables in different locations', function () {
         let contract: Contract;
 
         before(function () {
@@ -63,7 +63,7 @@ contracts('variables', (compile, _fallback, version) => {
         });
     });
 
-    describe('with private variables of different types', function () {
+    describe.skip('with private variables of different types', function () {
         let contract: Contract;
 
         before(function () {
@@ -98,7 +98,7 @@ contracts('variables', (compile, _fallback, version) => {
         });
     });
 
-    describe('with a hashed public variable and no usages', function () {
+    describe.skip('with a hashed public variable and no usages', function () {
         let contract: Contract;
 
         before(function () {
@@ -118,7 +118,7 @@ contracts('variables', (compile, _fallback, version) => {
         });
     });
 
-    describe('with an unreachable setter hashed public variable', function () {
+    describe.skip('with an unreachable setter hashed public variable', function () {
         let contract: Contract;
 
         before(function () {

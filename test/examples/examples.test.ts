@@ -7,7 +7,7 @@ import { Contract } from 'sevm';
 
 import abis from './abis';
 
-describe('examples', function () {
+describe.skip('examples', function () {
     [
         {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7' as const,

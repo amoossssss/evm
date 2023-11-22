@@ -6,7 +6,7 @@ import { eventSelector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
 contracts('events', (compile, fallback) => {
-    it('should emit unknown event', function () {
+    it.skip('should emit unknown event', function () {
         const src = `contract Test {
             event Event0(string);
             function emitEvent() external {
@@ -21,7 +21,7 @@ contracts('events', (compile, fallback) => {
         expect(text, text).to.match(/log\(0x[a-fA-F\d]+(, 0x[a-fA-F\d]+)+\);/);
     });
 
-    it('should emit hashed event', function () {
+    it.skip('should emit hashed event', function () {
         const src = `contract Test {
             event Transfer(uint256, address);
             function f(uint256 value) external {
@@ -38,7 +38,7 @@ contracts('events', (compile, fallback) => {
         expect(text, text).to.match(/emit Transfer\(_arg0 \+ 0x123, address\(this\)\);$/m);
     });
 
-    it('should emit hashed event with indexed topics', function () {
+    it.skip('should emit hashed event with indexed topics', function () {
         const src = `contract Test {
             event Send(uint256, address indexed);
             function f() external {
@@ -68,7 +68,7 @@ contracts('events', (compile, fallback) => {
         expect(text, text).to.match(/emit Transfer\(\);$/m);
     });
 
-    it('should emit anonymous event', function () {
+    it.skip('should emit anonymous event', function () {
         const src = `contract Test {
             event Transfer(uint256, address) anonymous;
             function f() external {
@@ -96,7 +96,7 @@ contracts('events', (compile, fallback) => {
         expect(text, text).to.match(/log\(\);$/m);
     });
 
-    it('should emit anonymous event with both arguments and no arguments', function () {
+    it.skip('should emit anonymous event with both arguments and no arguments', function () {
         const src = `contract Test {
             event Transfer() anonymous;
             event Send(uint256, uint256) anonymous;

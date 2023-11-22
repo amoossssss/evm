@@ -1,5 +1,5 @@
 import { decode, OPCODES, type Opcode, MNEMONICS } from './opcode';
-import { State } from './state';
+import { type Ram, State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 import { STEP, type Step, type ISelectorBranches } from './step';
 
@@ -109,17 +109,23 @@ export class EVM {
 
             this.exec(branch.pc, branch.state);
             const last = branch.state.last! as IInst;
-            if (last.next) {
-                for (const b of last.next()) {
-                    // const s = gc(b, this.chunks);
-                    // if (s === undefined) {
-                    branches.unshift(b);
-                    // } else {
-                    //     b.state = s;
-                    // }
-                }
-                // branches.unshift(...last.next());
+            for (const next of last.next ? last.next() : []) {
+                // const s = gc(b, this.chunks);
+                // if (s === undefined) {
+                branches.unshift(next);
+
+                // const chunk = this.chunks.get(next.pc);
+                // if (chunk === undefined) {
+                //     this.chunks.set(next.pc, { pcend: -1, states: [branch.state] });
+                // } else {
+                //     chunk.states.push(branch.state);
+                // }
+
+                // } else {
+                // next.state = s;
+                // }
             }
+            // branches.unshift(...last.next());
         }
     }
 
@@ -129,16 +135,20 @@ export class EVM {
         let pc = pc0;
         for (; !state.halted && pc < this.opcodes.length; pc++) {
             const opcode = this.opcodes[pc];
+            const step = this.insts[opcode.opcode];
+
             try {
-                this.insts[opcode.opcode](state, opcode);
-                if (!state.halted && this.opcodes[pc + 1]?.opcode === OPCODES.JUMPDEST) {
-                    const fallBranch = Branch.make(opcode.pc + 1, state);
-                    state.halt(new JumpDest(fallBranch));
-                }
+                step(state, opcode);
             } catch (err) {
                 const inv = new Throw((err as Error).message, opcode, state);
                 state.halt(inv);
                 this.errors.push(inv);
+                continue;
+            }
+
+            if (!state.halted && this.opcodes[pc + 1]?.opcode === OPCODES.JUMPDEST) {
+                const fallBranch = Branch.make(opcode.pc + 1, state);
+                state.halt(new JumpDest(fallBranch));
             }
         }
 
@@ -199,18 +209,20 @@ export function gc(b: Branch, chunks: EVM['chunks']) {
     return undefined;
 }
 
-function cmp({ stack: lhs }: State<Inst, Expr>, { stack: rhs }: State<Inst, Expr>) {
+function cmp({ stack: lhs }: Ram<Expr>, { stack: rhs }: Ram<Expr>) {
+    const cmpval = (lhs: Expr, rhs: Expr) =>
+        !(lhs.isVal() && lhs.isPush) || !(rhs.isVal() && rhs.isPush) || lhs.val === rhs.val;
+
+    // console.log('????', lhs.values, rhs.values);
     if (lhs.values.length !== rhs.values.length) {
+        // console.log('asdadsdsadsads', lhs.values, rhs.values);
         return false;
     }
     for (let i = 0; i < lhs.values.length; i++) {
         if (!cmpval(lhs.values[i], rhs.values[i])) {
+            // console.log('212112');
             return false;
         }
     }
     return true;
-
-    function cmpval(lhs: Expr, rhs: Expr) {
-        return !(lhs.isVal() && lhs.isPush) || !(rhs.isVal() && rhs.isPush) || lhs.val === rhs.val;
-    }
 }

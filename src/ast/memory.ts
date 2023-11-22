@@ -14,6 +14,9 @@ export class MLoad extends Tag {
     eval(): Expr {
         return new MLoad(this.loc.eval());
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 export class MStore implements IInst {

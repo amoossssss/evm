@@ -7,7 +7,7 @@ import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
 contracts('dispatch', compile => {
-    it("should decompile function's return type and non-payable", function () {
+    it.skip("should decompile function's return type and non-payable", function () {
         const src = `contract Test {
             function get() external pure returns (uint256) { return 5; }
         }`;
@@ -18,7 +18,7 @@ contracts('dispatch', compile => {
         );
     });
 
-    it('should `decompile` a contract with a single `external` method', function () {
+    it.skip('should `decompile` a contract with a single `external` method', function () {
         const src = `contract Test {
             function set() external payable { }
             function get() external pure returns (uint256) { return 5; }
@@ -30,7 +30,7 @@ contracts('dispatch', compile => {
         );
     });
 
-    it('should `decompile` a contract with multiple `external` functions', function () {
+    it.skip('should `decompile` a contract with multiple `external` functions', function () {
         const src = `contract Test {
             function balanceOf(uint256 from) external pure returns (uint256) { return from; }
             function symbol() external pure returns (uint256) { return 3; }

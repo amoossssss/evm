@@ -28,6 +28,9 @@ type ABI = {
     }[];
 }[];
 
+/**
+ * https://docs.soliditylang.org/en/latest/using-the-compiler.html#input-description
+ */
 interface SolcInputSettings {
     /**
      * Optional: Optimizer settings
@@ -47,7 +50,26 @@ interface SolcInputSettings {
          */
         details?: {
             /**
-             * Removes duplicate code blocks
+             * The peephole optimizer is always on if no details are given,
+             * use details to switch it off.
+             */
+            peephole?: boolean;
+            /**
+             * The inliner is always off if no details are given,
+             * use details to switch it on.
+             */
+            inliner?: boolean;
+            /**
+             * The unused jumpdest remover is always on if no details are given,
+             * use details to switch it off.
+             */
+            jumpdestRemover?: boolean;
+            /**
+             * Sometimes re-orders literals in commutative operations.
+             */
+            orderLiterals?: boolean;
+            /**
+             * Removes duplicate code blocks.
              */
             deduplicate?: boolean;
             /**
@@ -59,19 +81,38 @@ interface SolcInputSettings {
              * Optimize representation of literal numbers and strings in code.
              */
             constantOptimizer?: boolean;
+            yul?: boolean;
         };
     };
 }
 
-type SolcOutput = {
+/**
+ * https://docs.soliditylang.org/en/latest/using-the-compiler.html#output-description
+ */
+interface SolcOutput {
+    /**
+     * This contains the contract-level outputs.
+     * It can be limited/filtered by the `outputSelection` settings.
+     */
     contracts: {
         'source.sol': {
+            /**
+             * If the language used has no contract names,
+             * this field should equal to an empty string.
+             */
             [contractName: string]: {
+                /**
+                 * The Ethereum Contract ABI. If empty, it is represented as an empty array.
+                 * See https://docs.soliditylang.org/en/develop/abi-spec.html
+                 */
                 abi: ABI;
                 evm: { bytecode: Bytecode; deployedBytecode: Bytecode };
             };
         };
     };
+    /**
+     * Optional: not present if no errors/warnings/infos were encountered
+     */
     errors?: {
         /**
          * Mandatory ("error", "warning" or "info", but please note that this may be extended in the future)
@@ -82,7 +123,7 @@ type SolcOutput = {
          */
         formattedMessage: string;
     }[];
-};
+}
 
 const versionsLoaded = new Set<Version>();
 

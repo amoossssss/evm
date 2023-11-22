@@ -99,6 +99,9 @@ export class MappingLoad extends Tag {
     eval() {
         return this;
     }
+    override children(): Expr[] {
+        return [];
+    }
 }
 
 export class SLoad extends Tag {
@@ -109,5 +112,8 @@ export class SLoad extends Tag {
 
     eval(): Expr {
         return new SLoad(this.location.eval(), this.variables);
+    }
+    override children(): Expr[] {
+        return [];
     }
 }
